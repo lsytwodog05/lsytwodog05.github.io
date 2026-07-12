@@ -1,0 +1,108 @@
+.resume-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 0 0 2rem;
+}
+
+.resume-header {
+  background: linear-gradient(135deg, #4f8cff 0%, #6c63ff 100%);
+  color: #fff;
+  border-radius: 12px;
+  padding: 2rem 2.2rem;
+  margin-bottom: 1.8rem;
+}
+
+.resume-header h1 {
+  margin: 0 0 0.4rem;
+  font-size: 2rem;
+  border: none;
+}
+
+.resume-title {
+  margin: 0 0 1rem;
+  opacity: 0.95;
+  font-size: 1.05rem;
+}
+
+.resume-contact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem 1.2rem;
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.resume-contact a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.resume-page h2 {
+  margin-top: 1.8rem;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.35rem;
+  border-bottom: 2px solid #4f8cff;
+}
+
+.resume-item {
+  margin-bottom: 1.2rem;
+  padding: 1rem 1.1rem;
+  border-radius: 10px;
+  background: var(--card-bg, #f7f8fa);
+}
+
+.resume-item-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.35rem;
+}
+
+.resume-item-sub {
+  color: #666;
+  margin-bottom: 0.5rem;
+}
+
+.resume-item ul {
+  margin: 0.4rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.resume-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.resume-skill {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: #eef3ff;
+  color: #335eea;
+  font-size: 0.92rem;
+}
+
+[data-theme='dark'] .resume-item {
+  background: #1f1f1f;
+}
+
+[data-theme='dark'] .resume-item-sub {
+  color: #aaa;
+}
+
+[data-theme='dark'] .resume-skill {
+  background: #2a2f45;
+  color: #8eb4ff;
+}
+
+@media screen and (max-width: 768px) {
+  .resume-header {
+    padding: 1.4rem 1.2rem;
+  }
+
+  .resume-header h1 {
+    font-size: 1.6rem;
+  }
+}

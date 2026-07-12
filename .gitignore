@@ -1,0 +1,11 @@
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+node_modules/
+public/
+.deploy*/
+db.json
+*.swp
+.idea/
+.vscode/
