@@ -138,3 +138,4 @@ inject:
   head:
   bottom:
     - <link rel="stylesheet" href="/css/resume.css">
+    - <script>document.addEventListener('DOMContentLoaded',function(){document.querySelectorAll('#aside-content .author-info-name').forEach(function(el){el.textContent='李思怡'})})</script>
