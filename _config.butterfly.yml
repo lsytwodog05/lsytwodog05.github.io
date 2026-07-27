@@ -134,6 +134,12 @@ code_blocks:
   language: true
   shrink: false
 
+# 公式：服务端 hexo-filter-mathjax 渲染（见 _config.yml 的 mathjax）
+# 此处关闭主题前端 MathJax，避免冲突
+math:
+  use:
+  per_page: false
+
 inject:
   head:
   bottom:

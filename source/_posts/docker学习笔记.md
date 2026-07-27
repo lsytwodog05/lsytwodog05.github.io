@@ -50,7 +50,6 @@ sudo sh get-docker.sh
 1. 权限：非 root 用户执行 docker 命令需要 `sudo`，可配置免 sudo。
 
 
-
 ### 2. Windows 安装
 
 1. 开启系统功能：虚拟机平台 + 适用于 Linux 的 Windows 子系统（WSL）
@@ -66,7 +65,6 @@ wsl --update --web-download
 2. 保持 Docker Desktop 后台运行，终端执行 `docker --version` 验证
 
 
-
 ### 3. Mac 安装
 
 根据芯片（Intel / Apple Silicon）下载对应 Docker Desktop 安装包，安装完成后终端验证。
@@ -76,7 +74,6 @@ wsl --update --web-download
 日常操作优先使用命令行，可视化仅辅助查看。
 
 ## 三、镜像相关命令
-
 
 
 ### 1. 拉取镜像
@@ -93,7 +90,6 @@ docker pull docker.n8n.io/n8nio/n8n
 ```
 
 
-
 ### 2. 本地镜像管理
 
 ```bash
@@ -103,7 +99,6 @@ docker images
 # 删除镜像（名称/ID 均可）
 docker rmi nginx
 ```
-
 
 
 ### 补充说明
@@ -123,7 +118,6 @@ docker run nginx
 # -d 后台分离运行，只输出容器 ID
 docker run -d nginx
 ```
-
 
 
 ### 2. 查看容器
@@ -148,9 +142,7 @@ docker run -d -p 80:80 nginx
 ```
 
 
-
 ### 4. 数据持久化 `-v` 挂载卷
-
 
 
 #### ① 绑定挂载（宿真实目录绑定容器目录）
@@ -190,7 +182,6 @@ docker volume prune -a
 ```
 
 
-
 ### 5. run 常用附加参数
 
 ```bash
@@ -214,7 +205,6 @@ docker run --restart unless-stopped nginx
 ```
 
 
-
 ### 6. 启停、删除已有容器
 
 ```bash
@@ -232,7 +222,6 @@ docker create nginx
 ```
 
 
-
 ### 7. 容器日志与进入容器调试
 
 ```bash
@@ -248,7 +237,6 @@ docker exec my-nginx ps -ef
 # 交互式进入容器终端
 docker exec -it my-nginx /bin/sh
 ```
-
 
 
 ## 五、Docker 底层原理
@@ -274,7 +262,35 @@ Dockerfile：制作镜像的步骤脚本，类比建筑图纸。
 6. `CMD ["python","main.py"]`：容器启动默认命令，仅一条
 7. `ENTRYPOINT`：启动入口，优先级高于 CMD，不易被覆盖
 
+### 多阶段构建（生产环境常用）
 
+前端、Java 等项目常用**多阶段构建**：第一阶段编译打包，第二阶段只保留运行时文件，最终镜像更小。
+
+以 Vue/React 前端 + Nginx 为例：
+
+```dockerfile
+# 构建阶段
+FROM node:22-alpine AS build
+
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci
+COPY . .
+RUN npm run build
+
+# 生产阶段：只拿构建产物，不携带 node_modules 和源码
+FROM nginx:alpine
+COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+要点：
+
+- 两个 `FROM` 对应两个阶段，最终镜像只保留最后一个阶段
+- `COPY --from=build` 从构建阶段拷贝产物，不把编译环境打进生产镜像
+- 适合前后端分离项目：构建一次镜像，到处运行
 
 ### 构建 & 推送镜像
 
@@ -290,9 +306,7 @@ docker push username/app:v1
 ```
 
 
-
 ## 七、Docker 网络三大模式
-
 
 
 ### 1. Bridge 桥接（默认）
@@ -314,7 +328,6 @@ docker network rm my-net
 ```
 
 
-
 ### 2. Host 主机模式
 
 容器直接复用宿主机网络，无需 `-p` 端口映射
@@ -322,7 +335,6 @@ docker network rm my-net
 ```bash
 docker run --network host nginx
 ```
-
 
 
 ### 3. None 无网络
@@ -338,7 +350,6 @@ docker run --network none nginx
 ## 八、Docker Compose 多容器编排
 
 
-
 ### 作用
 
 单机多服务统一管理（后端 + 数据库 + ES 等），`docker-compose.yml` 替代多条 `docker run` 命令，自动创建独立子网，容器间用服务名通信。
@@ -346,16 +357,42 @@ docker run --network none nginx
 ### yaml 核心字段对应 docker run
 
 
-| Compose 字段  | 等价 docker run 参数 |
-| ----------- | ---------------- |
-| image       | 镜像名称             |
-| ports       | -p 端口映射          |
-| volumes     | -v 挂载卷           |
-| environment | -e 环境变量          |
-| depends_on  | 控制服务启动先后         |
+| Compose 字段 | 等价 docker run 参数 |
+| --- | --- |
+| image | 镜像名称（直接用现成镜像） |
+| build | 用 Dockerfile 现场构建镜像 |
+| ports | -p 端口映射 |
+| volumes | -v 挂载卷 |
+| environment | -e 环境变量 |
+| depends_on | 控制服务启动先后 |
+| networks | 加入指定网络 |
 
+### 使用 Dockerfile 构建自定义服务
 
+Compose 中除了 `image: nginx` 拉现成镜像，还可以用 `build` 指定 Dockerfile，**自动构建并启动**自定义镜像：
 
+```yaml
+frontend:
+  build:
+    context: ./frontend      # Dockerfile 所在目录
+    dockerfile: dockerfile   # Dockerfile 文件名
+  container_name: funrec-frontend
+  ports:
+    - "3000:80"              # 宿主机 3000 → 容器内 Nginx 80
+  depends_on:
+    - backend                # 等 backend 启动后再起 frontend
+  networks:
+    - funrec-network
+```
+
+说明：
+
+- `build.context`：构建上下文目录，即 `docker build` 的 `.` 路径
+- `build.dockerfile`：该目录下的 Dockerfile 文件名
+- `depends_on`：控制启动顺序（只保证容器先起，不保证服务就绪）
+- 执行 `docker compose up -d` 时会自动 `docker build`，无需手动 build 再 run
+
+典型场景：前端用多阶段 Dockerfile 构建出 Nginx 镜像，后端用 Python 镜像，数据库用官方 `postgres` 镜像，一条命令拉起整套服务。
 
 ### 常用命令
 
@@ -377,7 +414,6 @@ docker compose -f ./compose-dev.yml up -d
 ```
 
 
-
 ### 补充
 
 Docker Compose 适合单机开发；大规模集群生产环境使用 K8s。
@@ -389,6 +425,6 @@ Docker Compose 适合单机开发；大规模集群生产环境使用 K8s。
 3. 容器核心 `docker run`，重点掌握 `-p` 端口、`-v` 挂载、`-d` 后台、`-it` 交互
 4. 调试工具：`docker ps`、`docker logs`、`docker exec`
 5. 网络三种模式：bridge / host / none，自定义网桥实现容器互通
-6. Dockerfile 制作自定义业务镜像，可推送至 Docker Hub
-7. Compose 统一管理多容器应用，简化本地开发环境部署
+6. Dockerfile 制作自定义业务镜像，多阶段构建可缩小生产镜像体积
+7. Compose 统一管理多容器应用；`build` 字段可用 Dockerfile 自动构建自定义服务
 

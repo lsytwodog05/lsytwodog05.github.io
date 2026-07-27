@@ -82,6 +82,14 @@ search:
   content: true
   format: html
 
+# Server-side MathJax（配合 scripts/math-protect.js）
+# every_page: false，避免官方 after_post_render 与前置保护重复处理
+mathjax:
+  tags: none
+  single_dollars: true
+  every_page: false
+  append_css: false
+
 # Deployment (local manual deploy, optional)
 deploy:
   type: ''
